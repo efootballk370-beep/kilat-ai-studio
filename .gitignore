@@ -1,0 +1,13 @@
+node_modules/
+.next/
+.android-signing/
+android-twa/
+*.log
+.DS_Store
+
+.env
+.env.*
+!.env.example
+android-twa/
+.android-signing/
+public/downloads/*.aab

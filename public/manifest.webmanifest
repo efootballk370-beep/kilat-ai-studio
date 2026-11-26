@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "Laju — Autonomous Shorts Studio",
+  "short_name": "Laju",
+  "description": "Cari ide, tulis naskah, render video, dan kelola publikasi YouTube Shorts.",
+  "lang": "id-ID",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#11130f",
+  "theme_color": "#11130f",
+  "categories": ["productivity", "video", "business"],
+  "icons": [
+    { "src": "/pwa-icon/192", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa-icon/192", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/pwa-icon/512", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa-icon/512", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Buat ide Shorts", "short_name": "Ide baru", "url": "/?action=ideas&source=shortcut", "icons": [{ "src": "/pwa-icon/192", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Buka studio video", "short_name": "Studio", "url": "/?action=studio&source=shortcut", "icons": [{ "src": "/pwa-icon/192", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}
