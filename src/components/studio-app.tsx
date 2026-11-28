@@ -116,10 +116,44 @@ export function StudioApp({ initialState }: { initialState: StudioState }) {
   }
 
   async function saveAsset(id: string, render: RenderResult) {
-    const form = new FormData();
-    form.append("video", render.blob, `laju-short.${render.mime === "video/mp4" ? "mp4" : "webm"}`);
-    const result = await call(`/api/projects/${id}/asset`, { method: "POST", body: form });
-    return Boolean(result);
+    // Preferred path: stream the rendered video straight to YouTube from the
+    // device so server body-size limits (Netlify 6 MB) never apply.
+    try {
+      const session = await fetch(`/api/projects/${id}/upload-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ size: render.blob.size, mime: render.mime }),
+      });
+      const payload = await session.json() as { uploadUrl?: string; error?: string };
+      if (!session.ok || !payload.uploadUrl) throw new Error(payload.error || "Sesi unggah gagal.");
+      const put = await fetch(payload.uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": render.mime, "Content-Length": String(render.blob.size) },
+        body: render.blob,
+      });
+      if (!put.ok) throw new Error(`Unggahan ke YouTube gagal (${put.status}).`);
+      const uploaded = await put.json().catch(() => ({})) as { id?: string };
+      if (!uploaded.id) throw new Error("YouTube tidak mengirim ID video.");
+      const finalize = await fetch(`/api/projects/${id}/finalize-upload`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ videoId: uploaded.id, size: render.blob.size, mime: render.mime }),
+      });
+      const finalized = await finalize.json() as { error?: string };
+      if (!finalize.ok) throw new Error(finalized.error || "Finalisasi unggahan gagal.");
+      await refreshState();
+      return true;
+    } catch {
+      // Fallback: keep the asset on the server when it fits the 6 MB limit.
+      const form = new FormData();
+      form.append("video", render.blob, `laju-short.${render.mime === "video/mp4" ? "mp4" : "webm"}`);
+      const result = await call(`/api/projects/${id}/asset`, { method: "POST", body: form });
+      return Boolean(result);
+    }
+  }
+
+  async function refreshState() {
+    await call("/api/studio", undefined, true);
   }
 
   async function publish(id: string) {
